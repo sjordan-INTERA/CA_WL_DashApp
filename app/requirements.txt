@@ -1,0 +1,13 @@
+dash
+plotly
+pandas
+dash-bootstrap-components
+dash-daq
+networkx
+geopandas
+pyarrow
+shapely
+scipy
+numpy
+flask
+gunicorn

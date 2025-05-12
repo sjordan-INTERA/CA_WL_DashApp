@@ -1,0 +1,61 @@
+/* Importing a Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* General Body Styles */
+body {
+    font-family: 'Roboto', sans-serif; /* Use the chosen font */
+    background-color: #f0f0f0; /* Light grey background */
+    color: #333; /* Dark text color for contrast */
+    margin: 0;
+    padding: 20px; /* Add some padding around the body */
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    max-width: 1200px; /* Limit the width for better readability */
+    margin: auto; /* Center the dashboard */
+    padding: 20px;
+    background-color: #ffffff; /* White background for the main container */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Dropdown Styles */
+.dropdown {
+    margin: 10px 0; /* Add some vertical spacing */
+}
+
+/* Graph Styles */
+.graph {
+    margin: 20px 0; /* Add spacing above and below graphs */
+}
+
+/* Button Styles */
+button {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white; /* White text on buttons */
+    border: none; /* Remove border */
+    padding: 10px 20px; /* Padding for better touch targets */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-weight: 500; /* Slightly bolder text */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Tab Styles */
+.tab {
+    background-color: #e9ecef; /* Light grey for tab backgrounds */
+    padding: 10px; /* Padding inside tabs */
+    border-radius: 5px; /* Rounded corners */
+    margin: 5px 0; /* Vertical spacing between tabs */
+}
+
+/* Active Tab Styles */
+.tab.active {
+    background-color: #007bff; /* Active tab color */
+    color: white; /* White text for active tab */
+}
+
