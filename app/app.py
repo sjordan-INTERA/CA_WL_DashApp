@@ -36,7 +36,8 @@ if gdfsites.crs != gdfallwells.crs:
 # ---------------------------------------
 # Load the water level data for all wells
 # ---------------------------------------
-well_wls = pd.read_parquet(f"{base_path}/assets/wl_data_daily_filtered.parquet")
+well_wls = pd.read_parquet(f"{base_path}/assets/wl_data_daily_filtered_monthly.parquet")
+
 
 # -------------------------------------
 # Grab wells based on the selected site
@@ -61,52 +62,54 @@ def select_site(site,
         GeaDataFrame with spatial information about wells in 'site_data'.
 
     """
-    # Define the distance in feet (3 miles = 15840 feet)
-    distance_in_feet = 15840
+    # # Define the distance in feet (3 miles = 15840 feet)
+    # distance_in_feet = 15840
     
-    if county_filter:
-        selected_site = gpd.read_file(f"./assets/county_centroids/centroid_{site}.shp")
-        selected_site = selected_site.set_crs(4326)
-        selected_site = selected_site.to_crs(2227)
-    else:
-        # Find the specific site from gdfsites based on the "Name" column
-        selected_site = gdfsites[gdfsites['Name'] == site]
+    # if county_filter:
+    #     selected_site = gpd.read_file(f"./assets/county_centroids/centroid_{site}.shp")
+    #     selected_site = selected_site.set_crs(4326)
+    #     selected_site = selected_site.to_crs(2227)
+    # else:
+    #     # Find the specific site from gdfsites based on the "Name" column
+    #     selected_site = gdfsites[gdfsites['Name'] == site]
 
-    # Check if the site was found
-    if selected_site.empty:
-        print(f"Site '{site}' not found in gdfsites.")
-    else:
-        if county_filter:
-            site_geometry = selected_site.geometry
-        else:
-            # Use the geometry of the selected site to create a buffer
-            site_geometry = selected_site.iloc[0].geometry
-        buffer = site_geometry.buffer(distance_in_feet)
+    # # Check if the site was found
+    # if selected_site.empty:
+    #     print(f"Site '{site}' not found in gdfsites.")
+    # else:
+    #     if county_filter:
+    #         site_geometry = selected_site.geometry
+    #     else:
+    #         # Use the geometry of the selected site to create a buffer
+    #         site_geometry = selected_site.iloc[0].geometry
+    #     buffer = site_geometry.buffer(distance_in_feet)
         
-        # Find all wells within this buffer from gdf3
-        # Speed this up by using a bounding box filter first
-        bbox_buffer = buffer.envelope
+    #     # Find all wells within this buffer from gdf3
+    #     # Speed this up by using a bounding box filter first
+    #     bbox_buffer = buffer.envelope
         
-        if county_filter:
-            bbox_candidates = gdfallwells[gdfallwells.geometry.buffer(1e-9).within(
-                bbox_buffer.geometry.unary_union)]
-            nearby_wells = bbox_candidates[bbox_candidates.geometry.within(buffer.geometry.unary_union)]
-        else:
-            bbox_candidates = gdfallwells[gdfallwells.geometry.intersects(
-                bbox_buffer)]
-            nearby_wells = bbox_candidates[bbox_candidates.geometry.within(buffer)]
+    #     if county_filter:
+    #         bbox_candidates = gdfallwells[gdfallwells.geometry.buffer(1e-9).within(
+    #             bbox_buffer.geometry.unary_union)]
+    #         nearby_wells = bbox_candidates[bbox_candidates.geometry.within(buffer.geometry.unary_union)]
+    #     else:
+    #         bbox_candidates = gdfallwells[gdfallwells.geometry.intersects(
+    #             bbox_buffer)]
+    #         nearby_wells = bbox_candidates[bbox_candidates.geometry.within(buffer)]
 
-        # Convert to GeoDataFrame for final output
-        final_wells_gdf = gpd.GeoDataFrame(nearby_wells)
+    #     # Convert to GeoDataFrame for final output
+    #     final_wells_gdf = gpd.GeoDataFrame(nearby_wells)
+        
+    final_wells_gdf = gpd.read_parquet(f"{base_path}/assets/{site}_wells.parquet")
+    
+    # Extract the SWN values from the filtered wells GeoDataFrame
+    filtered_id_all = final_wells_gdf['ID_ALL'].unique()
 
-        # Extract the SWN values from the filtered wells GeoDataFrame
-        filtered_id_all = final_wells_gdf['ID_ALL'].unique()
+    # Search for rows in well_wls where ID_ALL matches filtered wells' ID_ALL
+    site_data = well_wls[well_wls['ID_ALL'].isin(filtered_id_all)]
 
-        # Search for rows in well_wls where ID_ALL matches filtered wells' ID_ALL
-        site_data = well_wls[well_wls['ID_ALL'].isin(filtered_id_all)]
-
-        # Sort the data by date to ensure a continuous plot
-        site_data = site_data.sort_values(by=['ID_ALL', 'Date'])
+    # Sort the data by date to ensure a continuous plot
+    site_data = site_data.sort_values(by=['ID_ALL', 'Date'])
 
     return site_data, filtered_id_all, final_wells_gdf
 
@@ -525,7 +528,8 @@ def render_selected_site_figure(site_data_trigger,resample,site,county):
         
         # if resample:
         #     if len(swn_data) > 1000:
-        swn_data = swn_data.resample('ME').mean()
+        # swn_data = swn_data.resample('ME').mean()
+        swn_data = swn_data.dropna(subset='wse')
         
         fig.add_trace(go.Scatter(
             x=swn_data.index,
@@ -725,7 +729,7 @@ def render_selected_wells_figure(selectedData,resample,site,selectedData_ref,sel
         color_values = [0.1]
     else:
         color_values = [i / (len(selected_wells) - 1) for i in range(len(selected_wells))]
-                
+        
     for i, swn in enumerate(selected_wells):
         swn_data = site_data[site_data['ID_ALL'] == swn]
 
@@ -733,7 +737,8 @@ def render_selected_wells_figure(selectedData,resample,site,selectedData_ref,sel
         
         # if resample:
         #     if len(swn_data) > 1000:
-        swn_data = swn_data.resample('ME').mean()
+        # swn_data = swn_data.resample('ME').mean()
+        swn_data = swn_data.dropna(subset='wse')
         
         # Fetch well attributes from final_wells_gdf for additional info
         well_info = final_wells_gdf[final_wells_gdf['ID_ALL'] == swn].iloc[0]
