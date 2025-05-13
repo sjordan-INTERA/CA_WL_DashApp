@@ -6,8 +6,6 @@ import geopandas as gpd
 import dash_daq as daq
 import os
 import warnings
-import numpy as np
-from scipy.spatial.distance import cdist
 import networkx as nx
 import dash_bootstrap_components as dbc
 import glob
@@ -22,12 +20,12 @@ base_path = os.path.dirname(os.path.abspath(__name__))
 # ------------------------------
 # Load data for monitoring wells
 # ------------------------------
-gdfallwells = gpd.read_parquet(f"{base_path}/assets/all_wells.parquet")
+gdfallwells = gpd.read_parquet(f"{base_path}/assets/all_wells_filtered.parquet")
 
 # ------------------------------
 # Load data for subsidence sites
 # ------------------------------
-gdfsites = gpd.read_parquet(f'{base_path}/assets/all_sites.parquet')
+gdfsites = gpd.read_parquet(f'{base_path}/assets/all_sites_filtered.parquet')
 
 # ---------
 # Check crs
@@ -38,7 +36,7 @@ if gdfsites.crs != gdfallwells.crs:
 # ---------------------------------------
 # Load the water level data for all wells
 # ---------------------------------------
-well_wls = pd.read_parquet(f"{base_path}/assets/wl_data_daily.parquet")
+well_wls = pd.read_parquet(f"{base_path}/assets/wl_data_daily_filtered.parquet")
 
 
 # -------------------------------------
@@ -151,7 +149,7 @@ def filter_within_radius_networkx(gdf, distance_in_feet):
 # ----------------------------------------------------
 global site_data, filtered_id_all, final_wells_gdf, site_subsidence_data
 
-site_subsidence_data = pd.read_parquet(f"{base_path}/assets/site_subsidence_data.parquet")
+site_subsidence_data = pd.read_parquet(f"{base_path}/assets/site_subsidence_data_filtered.parquet")
 
 # -------------------
 # Initialize Dash app
@@ -804,7 +802,11 @@ def render_subsidence_figure(site):
     global site_subsidence_data
     
     # Grab subsidence data for specified site
-    dat = site_subsidence_data.loc[site_subsidence_data['Site']==site]
+    if site == 'T_88':
+        t = 'T88'
+    else:
+        t = site
+    dat = site_subsidence_data.loc[site_subsidence_data['Site']==t]
     
     fig = go.Figure()
     # If no subsidence data for site, return empty figure
