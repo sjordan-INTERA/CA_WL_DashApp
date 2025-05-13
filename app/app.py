@@ -38,7 +38,6 @@ if gdfsites.crs != gdfallwells.crs:
 # ---------------------------------------
 well_wls = pd.read_parquet(f"{base_path}/assets/wl_data_daily_filtered.parquet")
 
-
 # -------------------------------------
 # Grab wells based on the selected site
 # -------------------------------------
@@ -524,9 +523,9 @@ def render_selected_site_figure(site_data_trigger,resample,site,county):
         
         swn_data = swn_data.set_index(pd.to_datetime(swn_data['Date']))
         
-        if resample:
-            if len(swn_data) > 1000:
-                swn_data = swn_data.resample('ME').mean()
+        # if resample:
+        #     if len(swn_data) > 1000:
+        swn_data = swn_data.resample('ME').mean()
         
         fig.add_trace(go.Scatter(
             x=swn_data.index,
@@ -732,9 +731,9 @@ def render_selected_wells_figure(selectedData,resample,site,selectedData_ref,sel
 
         swn_data = swn_data.set_index(pd.to_datetime(swn_data['Date']))[['Date','wse']]
         
-        if resample:
-            if len(swn_data) > 1000:
-                swn_data = swn_data.resample('ME').mean()
+        # if resample:
+        #     if len(swn_data) > 1000:
+        swn_data = swn_data.resample('ME').mean()
         
         # Fetch well attributes from final_wells_gdf for additional info
         well_info = final_wells_gdf[final_wells_gdf['ID_ALL'] == swn].iloc[0]
